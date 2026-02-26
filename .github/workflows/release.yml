@@ -86,23 +86,28 @@ jobs:
         include:
           - os: ubuntu-latest
             target: x86_64-unknown-linux-gnu
+            asset_name: linux-x86_64
             artifact: browsercli
             archive: tar.gz
           - os: ubuntu-latest
             target: aarch64-unknown-linux-gnu
+            asset_name: linux-arm64
             artifact: browsercli
             archive: tar.gz
             use_cross: true
           - os: macos-latest
             target: x86_64-apple-darwin
+            asset_name: macos-x86_64
             artifact: browsercli
             archive: tar.gz
           - os: macos-latest
             target: aarch64-apple-darwin
+            asset_name: macos-arm64
             artifact: browsercli
             archive: tar.gz
           - os: windows-latest
             target: x86_64-pc-windows-msvc
+            asset_name: windows-x86_64
             artifact: browsercli.exe
             archive: zip
     steps:
@@ -140,7 +145,7 @@ jobs:
         if: matrix.archive == 'tar.gz'
         shell: bash
         run: |
-          NAME="browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}"
+          NAME="browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.asset_name }}"
           mkdir "$NAME"
           cp "target/${{ matrix.target }}/release/${{ matrix.artifact }}" "$NAME/"
           cp LICENSE README.md "$NAME/"
@@ -152,7 +157,7 @@ jobs:
         if: matrix.archive == 'zip'
         shell: pwsh
         run: |
-          $NAME = "browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}"
+          $NAME = "browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.asset_name }}"
           New-Item -ItemType Directory -Path $NAME
           Copy-Item "target/${{ matrix.target }}/release/${{ matrix.artifact }}" "$NAME/"
           Copy-Item LICENSE, README.md "$NAME/"
@@ -162,8 +167,8 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.target }}
-          path: browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}.*
+          name: release-${{ matrix.asset_name }}
+          path: browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.asset_name }}.*
           retention-days: 1
 
   # ---------------------------------------------------------------------------
@@ -331,10 +336,10 @@ jobs:
           VERSION="${{ steps.ver.outputs.version }}"
 
           # Extract SHA256 for each target
-          SHA_DARWIN_ARM64=$(grep "aarch64-apple-darwin" checksums/*.sha256 | head -1 | awk '{print $1}')
-          SHA_DARWIN_X86=$(grep "x86_64-apple-darwin" checksums/*.sha256 | head -1 | awk '{print $1}')
-          SHA_LINUX_ARM64=$(grep "aarch64-unknown-linux-gnu" checksums/*.sha256 | head -1 | awk '{print $1}')
-          SHA_LINUX_X86=$(grep "x86_64-unknown-linux-gnu" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_DARWIN_ARM64=$(grep "macos-arm64" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_DARWIN_X86=$(grep "macos-x86_64" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(grep "linux-arm64" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_LINUX_X86=$(grep "linux-x86_64" checksums/*.sha256 | head -1 | awk '{print $1}')
 
           # Generate formula from template
           sed -e "s/version \"1.0.0\"/version \"${VERSION}\"/" \

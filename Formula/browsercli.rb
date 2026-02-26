@@ -11,20 +11,20 @@ class Browsercli < Formula
 
   on_macos do
     if Hardware::CPU.arm?
-      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-aarch64-apple-darwin.tar.gz"
+      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-macos-arm64.tar.gz"
       sha256 "PLACEHOLDER"
     else
-      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-x86_64-apple-darwin.tar.gz"
+      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-macos-x86_64.tar.gz"
       sha256 "PLACEHOLDER"
     end
   end
 
   on_linux do
     if Hardware::CPU.arm?
-      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-aarch64-unknown-linux-gnu.tar.gz"
+      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-linux-arm64.tar.gz"
       sha256 "PLACEHOLDER"
     else
-      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-x86_64-unknown-linux-gnu.tar.gz"
+      url "https://github.com/justinhuangcode/browsercli/releases/download/v#{version}/browsercli-v#{version}-linux-x86_64.tar.gz"
       sha256 "PLACEHOLDER"
     end
   end

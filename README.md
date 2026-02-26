@@ -75,11 +75,11 @@ Download the latest binary for your platform from [GitHub Releases](https://gith
 
 | Platform | Archive |
 | --- | --- |
-| Linux x86_64 | `browsercli-v*-x86_64-unknown-linux-gnu.tar.gz` |
-| Linux ARM64 | `browsercli-v*-aarch64-unknown-linux-gnu.tar.gz` |
-| macOS Intel | `browsercli-v*-x86_64-apple-darwin.tar.gz` |
-| macOS Apple Silicon | `browsercli-v*-aarch64-apple-darwin.tar.gz` |
-| Windows x86_64 | `browsercli-v*-x86_64-pc-windows-msvc.zip` |
+| Linux x86_64 | `browsercli-v*-linux-x86_64.tar.gz` |
+| Linux ARM64 | `browsercli-v*-linux-arm64.tar.gz` |
+| macOS Intel | `browsercli-v*-macos-x86_64.tar.gz` |
+| macOS Apple Silicon | `browsercli-v*-macos-arm64.tar.gz` |
+| Windows x86_64 | `browsercli-v*-windows-x86_64.zip` |
 
 Extract the archive and place the binary in your `$PATH`.
 
