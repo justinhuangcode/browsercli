@@ -1,49 +1,18 @@
-name: Backfill GitHub Packages
+name: Fix GitHub Packages latest
 
 on:
   workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Git tag to publish (e.g. v1.0.0)'
-        required: true
-        type: string
 
 jobs:
-  publish:
-    name: Publish to GitHub Packages
+  fix-tag:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
       packages: write
-    defaults:
-      run:
-        working-directory: clients/node
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.tag }}
-
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://npm.pkg.github.com'
-
-      # Patch package name to scoped name if needed
-      - name: Patch package.json to scoped name
-        run: |
-          node -e "
-            const pkg = require('./package.json');
-            if (pkg.name === 'browsercli') {
-              pkg.name = '@justinhuangcode/browsercli';
-              require('fs').writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n');
-              console.log('Patched name to @justinhuangcode/browsercli');
-            } else {
-              console.log('Name already scoped: ' + pkg.name);
-            }
-          "
-
-      - run: npm ci
-      - run: npm run build
-      - run: npm publish --access public
+      - run: npm dist-tag add @justinhuangcode/browsercli@1.0.3 latest --registry https://npm.pkg.github.com
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
