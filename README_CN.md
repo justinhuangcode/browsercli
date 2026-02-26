@@ -18,6 +18,38 @@
 
 面向 AI Agent 的浏览器可视化工作空间。在本地目录中编写 HTML/CSS/JS，通过真实的 Chromium 浏览器渲染，完整支持 DevTools 控制 -- 全部通过命令行操作。
 
+## 为什么选择 browsercli？
+
+AI Agent 生成 HTML/CSS/JS 之后，需要**看到自己构建的页面**。它们需要在真实浏览器中渲染页面、截图、读取 DOM、检查控制台错误，然后迭代修改——而这一切不需要人类手动操作。
+
+现有工具无法满足这个工作流：
+
+| | browsercli | Playwright | Puppeteer | live-server |
+|---|---|---|---|---|
+| 为 AI Agent 设计 | 是 | 否（测试框架） | 否（库） | 否（开发工具） |
+| 持久化守护进程 | 是 — `start` 一次，随时控制 | 否 — 每次脚本启动新浏览器 | 否 — 每次脚本启动新浏览器 | 无守护进程 |
+| 本地文件服务 + 自动刷新 | 内置（250ms） | 无 | 无 | 有，但无自动化能力 |
+| CLI + 客户端库 | CLI + Python + Node.js | Python/Node.js/Java/.NET | 仅 Node.js | 无 |
+| DOM / 截图 / 控制台 / 网络 | 全部通过 CLI 或 SDK | 仅通过代码 | 仅通过代码 | 无 |
+| 插件系统 | 模板 + RPC + 钩子 | 无 | 无 | 无 |
+| 上手复杂度 | `browsercli start` | 安装 + 编写测试脚本 | 安装 + 编写脚本 | `npx live-server` |
+
+**AI Agent 使用 browsercli 的典型工作流：**
+
+```
+Agent 将 HTML/CSS/JS 写入磁盘
+        ↓
+browsercli 自动刷新浏览器（250ms）
+        ↓
+Agent 执行：browsercli screenshot --out page.png
+        ↓
+Agent 检查截图 / 查询 DOM / 检查控制台
+        ↓
+Agent 迭代修改代码
+```
+
+无需测试框架样板代码。无需管理浏览器生命周期。只需一个持久运行的浏览器，实时反映你的文件并响应命令。
+
 ## 特性
 
 - **守护进程架构** -- `browsercli start` 启动后台进程，CLI 命令通过 Unix socket RPC（macOS/Linux）或 TCP localhost（Windows）与其通信

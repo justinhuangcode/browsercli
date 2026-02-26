@@ -18,6 +18,38 @@
 
 A browser visual workspace for AI agents. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control — all from the command line.
 
+## Why browsercli?
+
+AI agents that generate HTML/CSS/JS need to **see what they built**. They need to render the page in a real browser, take a screenshot, read the DOM, check for console errors, and iterate — all without a human clicking around.
+
+Existing tools don't fit this workflow:
+
+| | browsercli | Playwright | Puppeteer | live-server |
+|---|---|---|---|---|
+| Designed for AI agents | Yes | No (test framework) | No (library) | No (dev tool) |
+| Persistent daemon | Yes — `start` once, control anytime | No — new browser per script | No — new browser per script | No daemon |
+| Local file serving + auto-reload | Built-in (250ms) | No | No | Yes, but no automation |
+| CLI + client libraries | CLI + Python + Node.js | Python/Node.js/Java/.NET | Node.js only | None |
+| DOM / screenshot / console / network | All via CLI or SDK | Via code only | Via code only | None |
+| Plugin system | Templates + RPC + hooks | No | No | No |
+| Setup complexity | `browsercli start` | Install + write test script | Install + write script | `npx live-server` |
+
+**The typical AI agent workflow with browsercli:**
+
+```
+Agent writes HTML/CSS/JS to disk
+        ↓
+browsercli auto-reloads the browser (250ms)
+        ↓
+Agent runs: browsercli screenshot --out page.png
+        ↓
+Agent inspects the screenshot / queries DOM / checks console
+        ↓
+Agent iterates on the code
+```
+
+No test framework boilerplate. No browser lifecycle management. Just a persistent browser that reflects your files and responds to commands.
+
 ## Features
 
 - **Daemon architecture** — `browsercli start` launches a background process; CLI commands talk to it via Unix socket RPC (macOS/Linux) or TCP localhost (Windows)
