@@ -26,8 +26,19 @@ jobs:
               repo: context.repo.repo,
               ref: `tags/${tag}`
             });
-            const sha = ref.object.sha;
-            core.info(`Tag ${tag} points to ${sha}`);
+            // For annotated tags, ref.object.type is "tag" and we need to
+            // dereference to get the underlying commit SHA.
+            let sha = ref.object.sha;
+            if (ref.object.type === 'tag') {
+              const { data: tagObj } = await github.rest.git.getTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_sha: sha
+              });
+              sha = tagObj.object.sha;
+              core.info(`Dereferenced annotated tag to commit ${sha}`);
+            }
+            core.info(`Tag ${tag} points to commit ${sha}`);
 
             // Wait up to 5 minutes for CI to appear / complete
             const maxWait = 5 * 60 * 1000;
