@@ -179,7 +179,7 @@ fn validate_manifest(manifest: &PluginManifest, plugin_dir: &Path) -> Result<()>
     // Template source dirs must be within plugin dir.
     for entry in manifest.templates.values() {
         let source = Path::new(&entry.source);
-        if source.is_absolute() || entry.source.contains("..") {
+        if source.is_absolute() || entry.source.starts_with('/') || entry.source.contains("..") {
             anyhow::bail!(
                 "template source '{}' must be a relative path without '..'",
                 entry.source
@@ -193,7 +193,10 @@ fn validate_manifest(manifest: &PluginManifest, plugin_dir: &Path) -> Result<()>
 /// Ensure a script path is relative and doesn't escape the plugin directory.
 fn validate_script_path(script: &str, _plugin_dir: &Path) -> Result<()> {
     let p = Path::new(script);
-    if p.is_absolute() {
+    // On Windows, Path::is_absolute() requires a drive letter (e.g. C:\).
+    // Also reject Unix-style absolute paths (starting with /) on all platforms
+    // so manifests are portable.
+    if p.is_absolute() || script.starts_with('/') {
         anyhow::bail!("script path '{}' must be relative", script);
     }
     if script.contains("..") {

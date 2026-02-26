@@ -207,21 +207,45 @@ mod tests {
         dir
     }
 
-    fn write_script(dir: &Path, name: &str, content: &str) -> PathBuf {
-        let path = dir.join(name);
-        fs::write(&path, content).unwrap();
+    /// Write a platform-appropriate script.
+    ///
+    /// On Unix: writes a `.sh` file with shebang and +x permission.
+    /// On Windows: writes a `.cmd` file with batch syntax.
+    fn write_script(dir: &Path, base_name: &str, unix_content: &str) -> PathBuf {
         #[cfg(unix)]
         {
+            let path = dir.join(format!("{}.sh", base_name));
+            fs::write(&path, unix_content).unwrap();
             use std::os::unix::fs::PermissionsExt;
             fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
+            path
         }
-        path
+        #[cfg(windows)]
+        {
+            // Map common shell scripts to batch equivalents.
+            let _ = unix_content; // used only on Unix
+            let bat = match base_name {
+                "hello" => "@echo off\necho hello world\n",
+                "echo_stdin" => {
+                    // Windows batch: read stdin via `findstr` (pass-through)
+                    "@echo off\nfindstr \"^\" \n"
+                }
+                "env" => "@echo off\necho %MY_VAR%\n",
+                "fail" => "@echo off\nexit /b 42\n",
+                "stderr" => "@echo off\necho error msg >&2\nexit /b 1\n",
+                "slow" => "@echo off\nping -n 30 127.0.0.1 >nul\n",
+                _ => "@echo off\n",
+            };
+            let path = dir.join(format!("{}.cmd", base_name));
+            fs::write(&path, bat).unwrap();
+            path
+        }
     }
 
     #[tokio::test]
     async fn execute_simple_script() {
         let dir = tmp_dir("simple");
-        let script = write_script(&dir, "hello.sh", "#!/bin/sh\necho hello world\n");
+        let script = write_script(&dir, "hello", "#!/bin/sh\necho hello world\n");
 
         let executor = ScriptExecutor::with_default_timeout();
         let ctx = ExecutionContext::default();
@@ -238,9 +262,10 @@ mod tests {
     }
 
     #[tokio::test]
+    #[cfg(unix)] // stdin piping to batch `findstr` is unreliable; test on Unix only.
     async fn execute_script_with_stdin() {
         let dir = tmp_dir("stdin");
-        let script = write_script(&dir, "echo_stdin.sh", "#!/bin/sh\ncat\n");
+        let script = write_script(&dir, "echo_stdin", "#!/bin/sh\ncat\n");
 
         let executor = ScriptExecutor::with_default_timeout();
         let ctx = ExecutionContext {
@@ -261,7 +286,7 @@ mod tests {
     #[tokio::test]
     async fn execute_script_with_env_vars() {
         let dir = tmp_dir("env");
-        let script = write_script(&dir, "env.sh", "#!/bin/sh\necho $MY_VAR\n");
+        let script = write_script(&dir, "env", "#!/bin/sh\necho $MY_VAR\n");
 
         let executor = ScriptExecutor::with_default_timeout();
         let mut env = HashMap::new();
@@ -281,7 +306,7 @@ mod tests {
     #[tokio::test]
     async fn execute_script_nonzero_exit() {
         let dir = tmp_dir("nonzero");
-        let script = write_script(&dir, "fail.sh", "#!/bin/sh\nexit 42\n");
+        let script = write_script(&dir, "fail", "#!/bin/sh\nexit 42\n");
 
         let executor = ScriptExecutor::with_default_timeout();
         let ctx = ExecutionContext::default();
@@ -296,11 +321,7 @@ mod tests {
     #[tokio::test]
     async fn execute_script_stderr() {
         let dir = tmp_dir("stderr");
-        let script = write_script(
-            &dir,
-            "stderr.sh",
-            "#!/bin/sh\necho 'error msg' >&2\nexit 1\n",
-        );
+        let script = write_script(&dir, "stderr", "#!/bin/sh\necho 'error msg' >&2\nexit 1\n");
 
         let executor = ScriptExecutor::with_default_timeout();
         let ctx = ExecutionContext::default();
@@ -315,7 +336,7 @@ mod tests {
     #[tokio::test]
     async fn execute_script_timeout() {
         let dir = tmp_dir("timeout");
-        let script = write_script(&dir, "slow.sh", "#!/bin/sh\nsleep 30\n");
+        let script = write_script(&dir, "slow", "#!/bin/sh\nsleep 30\n");
 
         let executor = ScriptExecutor::new(Duration::from_millis(200));
         let ctx = ExecutionContext::default();
