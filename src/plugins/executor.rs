@@ -214,9 +214,14 @@ mod tests {
     fn write_script(dir: &Path, base_name: &str, unix_content: &str) -> PathBuf {
         #[cfg(unix)]
         {
-            let path = dir.join(format!("{}.sh", base_name));
-            fs::write(&path, unix_content).unwrap();
+            use std::io::Write;
             use std::os::unix::fs::PermissionsExt;
+
+            let path = dir.join(format!("{}.sh", base_name));
+            let mut f = fs::File::create(&path).unwrap();
+            f.write_all(unix_content.as_bytes()).unwrap();
+            f.sync_all().unwrap();
+            drop(f);
             fs::set_permissions(&path, fs::Permissions::from_mode(0o755)).unwrap();
             path
         }
