@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>browsercli — Dashboard</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/daisyui.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="min-h-screen bg-base-200">
+  <!-- Navbar -->
+  <nav class="navbar bg-base-100 shadow-sm">
+    <div class="flex-1">
+      <span class="text-xl font-bold px-4">Dashboard</span>
+    </div>
+    <div class="flex-none gap-2">
+      <div class="badge badge-primary">Live</div>
+    </div>
+  </nav>
+
+  <div class="mx-auto max-w-6xl px-4 py-8">
+    <!-- Stats row -->
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Total Users</div>
+        <div class="stat-value">12,400</div>
+        <div class="stat-desc text-success">+8% this month</div>
+      </div>
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Revenue</div>
+        <div class="stat-value">$34.2K</div>
+        <div class="stat-desc text-success">+12% this month</div>
+      </div>
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Active Now</div>
+        <div class="stat-value">573</div>
+        <div class="stat-desc text-warning">-3% from yesterday</div>
+      </div>
+      <div class="stat bg-base-100 rounded-box shadow">
+        <div class="stat-title">Uptime</div>
+        <div class="stat-value">99.9%</div>
+        <div class="stat-desc">Last 30 days</div>
+      </div>
+    </div>
+
+    <!-- Main content grid -->
+    <div class="grid gap-6 lg:grid-cols-3">
+      <!-- Wide panel -->
+      <div class="lg:col-span-2 bg-base-100 rounded-box shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Activity</h2>
+        <p class="text-sm text-gray-500">Replace this area with a chart, table, or any visualization.</p>
+        <div class="mt-4 h-48 rounded-lg bg-base-200 flex items-center justify-center text-gray-400">
+          Chart placeholder
+        </div>
+      </div>
+
+      <!-- Side panel -->
+      <div class="bg-base-100 rounded-box shadow p-6">
+        <h2 class="text-lg font-semibold mb-4">Recent Events</h2>
+        <ul class="space-y-3">
+          <li class="flex items-center gap-3">
+            <div class="badge badge-sm badge-success">OK</div>
+            <span class="text-sm">Deploy completed</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <div class="badge badge-sm badge-warning">WARN</div>
+            <span class="text-sm">High memory usage</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <div class="badge badge-sm badge-success">OK</div>
+            <span class="text-sm">Backup finished</span>
+          </li>
+          <li class="flex items-center gap-3">
+            <div class="badge badge-sm badge-info">INFO</div>
+            <span class="text-sm">New user signed up</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Table section -->
+    <div class="mt-8 bg-base-100 rounded-box shadow p-6">
+      <h2 class="text-lg font-semibold mb-4">Data Table</h2>
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Status</th>
+              <th>Role</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Alice</td>
+              <td><div class="badge badge-success badge-sm">Active</div></td>
+              <td>Admin</td>
+              <td><button class="btn btn-xs btn-ghost">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Bob</td>
+              <td><div class="badge badge-success badge-sm">Active</div></td>
+              <td>Editor</td>
+              <td><button class="btn btn-xs btn-ghost">Edit</button></td>
+            </tr>
+            <tr>
+              <td>Charlie</td>
+              <td><div class="badge badge-warning badge-sm">Away</div></td>
+              <td>Viewer</td>
+              <td><button class="btn btn-xs btn-ghost">Edit</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-8 py-4 text-center text-xs text-gray-400">
+    Powered by <a href="https://github.com/justinhuangcode/browsercli" class="underline">browsercli</a>
+  </footer>
+</body>
+</html>

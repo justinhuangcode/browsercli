@@ -1,6 +1,6 @@
 {
   "name": "@justinhuangcode/browsercli",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "TypeScript/Node.js client for the browsercli browser workspace daemon",
   "type": "module",
   "main": "./dist/src/index.js",

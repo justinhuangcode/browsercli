@@ -233,12 +233,32 @@ browsercli 内置插件系统，提供**三大扩展点**：页面模板、自�
     └── on_start.sh          # 生命周期钩子脚本
 ```
 
-### 1. 页面模板
+### 内置模板
 
-模板是 HTML/CSS/JS 脚手架，在启动时复制到服务目录：
+browsercli 自带 4 个内置模板，开箱即用，无需安装插件：
+
+| 模板 | 技术栈 | 用途 |
+|------|--------|------|
+| `tailwind` | Tailwind CSS v4 CDN | 通用响应式 UI |
+| `dashboard` | Tailwind CSS v4 + DaisyUI v5 | 管理面板、监控仪表盘 |
+| `chart` | Tailwind CSS v4 + Chart.js v4 | 数据可视化（柱状图、折线图、饼图、雷达图） |
+| `form` | Tailwind CSS v4 + Alpine.js v3 | 交互式表单（含客户端验证） |
 
 ```bash
+browsercli start --template tailwind
 browsercli start --template dashboard
+browsercli start --template chart
+browsercli start --template form
+```
+
+所有模板都是单文件 HTML + CDN 引入，零构建步骤，即时刷新。
+
+### 1. 页面模板（插件）
+
+插件可以提供额外的模板。模板是 HTML/CSS/JS 脚手架，在启动时复制到服务目录：
+
+```bash
+browsercli start --template my-custom-template
 ```
 
 ### 2. 自定义 RPC 端点
@@ -463,6 +483,16 @@ browsercli 专为**单用户本地开发机**设计。以下是各层安全控�
 | `--no-stealth` | 禁用所有隐身补丁 — 浏览器报告为自动化环境 |
 
 **适用范围：** 隐身模式仅用于自动化检测干扰页面行为的本地开发和测试场景，*不用于*绕过外部网站的安全控制。
+
+## 常见问题
+
+详见 [TROUBLESHOOTING.md](TROUBLESHOOTING.md)（英文），常见问题包括：
+
+- 找不到浏览器 — 各平台安装指引
+- 端口冲突
+- 无头模式（服务器 / CI 环境）
+- 权限错误
+- 模板未找到
 
 ## 参与贡献
 

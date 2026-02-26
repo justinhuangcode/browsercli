@@ -1,4 +1,5 @@
 mod browser;
+mod builtin_templates;
 mod cli;
 mod daemon;
 mod plugins;
@@ -831,6 +832,12 @@ fn cmd_plugin_list(json: bool) -> Result<()> {
         };
         println!("{}", serde_json::to_string_pretty(&resp)?);
     } else if summary.is_empty() {
+        let builtins = builtin_templates::list_builtin_templates();
+        if !builtins.is_empty() {
+            eprintln!("built-in templates: {}", builtins.join(", "));
+            eprintln!("  usage: browsercli start --template <name>");
+            eprintln!();
+        }
         eprintln!("no plugins installed");
         eprintln!("  plugins directory: {}", plugins_root.display());
         eprintln!("  create one with:   browsercli plugin init <name>");

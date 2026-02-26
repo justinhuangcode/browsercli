@@ -63,15 +63,23 @@ pub async fn run_daemon(cfg: DaemonConfig) -> Result<()> {
     let plugin_executor = Arc::new(plugins::ScriptExecutor::with_default_timeout());
 
     // Apply template if requested.
+    // Check built-in templates first, then fall back to plugin registry.
     if let Some(ref tpl_name) = cfg.template {
-        let tpl = plugin_registry.get_template(tpl_name).ok_or_else(|| {
-            anyhow::anyhow!(
-                "template '{}' not found (available: {})",
-                tpl_name,
-                plugin_registry.list_templates().join(", ")
-            )
-        })?;
-        plugins::apply_template(tpl, &PathBuf::from(&cfg.serve_dir)).await?;
+        let dest = PathBuf::from(&cfg.serve_dir);
+        let applied = crate::builtin_templates::apply_builtin_template(tpl_name, &dest).await?;
+        if !applied {
+            // Fall back to plugin-provided templates.
+            let mut available: Vec<&str> = crate::builtin_templates::list_builtin_templates();
+            available.extend(plugin_registry.list_templates());
+            let tpl = plugin_registry.get_template(tpl_name).ok_or_else(|| {
+                anyhow::anyhow!(
+                    "template '{}' not found (available: {})",
+                    tpl_name,
+                    available.join(", ")
+                )
+            })?;
+            plugins::apply_template(tpl, &dest).await?;
+        }
     }
 
     #[cfg(unix)]
@@ -110,7 +118,7 @@ pub async fn run_daemon(cfg: DaemonConfig) -> Result<()> {
 
     let browser_bin = if cfg.browser_bin.is_empty() {
         crate::browser::find::find_chromium_binary()
-            .context("no Chromium/Chrome browser found (set --browser-bin)")?
+            .context(browser_not_found_message())?
     } else {
         cfg.browser_bin.clone()
     };
@@ -762,6 +770,35 @@ async fn remove_session(state_dir: &str) -> Result<()> {
     let path = Path::new(state_dir).join("session.json");
     let _ = tokio::fs::remove_file(&path).await;
     Ok(())
+}
+
+/// Build a detailed error message when no Chromium browser is found.
+fn browser_not_found_message() -> String {
+    let mut msg = String::from("could not find a Chromium-based browser\n\n");
+    msg.push_str("browsercli requires Chrome, Chromium, Brave, or Edge.\n\n");
+
+    if cfg!(target_os = "macos") {
+        msg.push_str("Install options (macOS):\n");
+        msg.push_str("  brew install --cask google-chrome\n");
+        msg.push_str("  brew install --cask chromium\n");
+        msg.push_str("  brew install --cask brave-browser\n");
+    } else if cfg!(target_os = "linux") {
+        msg.push_str("Install options (Linux):\n");
+        msg.push_str("  sudo apt install chromium-browser        (Ubuntu/Debian)\n");
+        msg.push_str("  sudo dnf install chromium                (Fedora)\n");
+        msg.push_str("  sudo pacman -S chromium                  (Arch)\n");
+        msg.push_str("  snap install chromium                    (Snap)\n");
+    } else if cfg!(target_os = "windows") {
+        msg.push_str("Install options (Windows):\n");
+        msg.push_str("  winget install Google.Chrome\n");
+        msg.push_str("  choco install googlechrome\n");
+    }
+
+    msg.push_str("\nOr specify a custom binary path:\n");
+    msg.push_str("  browsercli start --browser-bin /path/to/chrome\n\n");
+    msg.push_str("You can also set the CHROME_BIN environment variable.\n");
+    msg.push_str("See: https://github.com/justinhuangcode/browsercli#troubleshooting");
+    msg
 }
 
 fn chrono_like_now() -> String {

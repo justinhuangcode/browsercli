@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>browsercli — Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+</head>
+<body class="min-h-screen bg-gray-50 text-gray-900">
+  <header class="bg-white shadow-sm">
+    <div class="mx-auto max-w-5xl px-4 py-6">
+      <h1 class="text-2xl font-bold tracking-tight">Data Visualization</h1>
+      <p class="mt-1 text-sm text-gray-500">Chart.js + Tailwind CSS v4 — edit the data arrays below.</p>
+    </div>
+  </header>
+
+  <main class="mx-auto max-w-5xl px-4 py-10">
+    <div class="grid gap-8 lg:grid-cols-2">
+      <!-- Bar chart -->
+      <div class="rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">Monthly Revenue</h2>
+        <canvas id="barChart"></canvas>
+      </div>
+
+      <!-- Line chart -->
+      <div class="rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">User Growth</h2>
+        <canvas id="lineChart"></canvas>
+      </div>
+
+      <!-- Doughnut chart -->
+      <div class="rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">Traffic Sources</h2>
+        <canvas id="doughnutChart"></canvas>
+      </div>
+
+      <!-- Radar chart -->
+      <div class="rounded-xl bg-white p-6 shadow">
+        <h2 class="mb-4 text-lg font-semibold">Performance Scores</h2>
+        <canvas id="radarChart"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-16 border-t border-gray-200 py-6 text-center text-xs text-gray-400">
+    Powered by <a href="https://github.com/justinhuangcode/browsercli" class="underline">browsercli</a>
+  </footer>
+
+  <script>
+    // --- Sample data — replace with your own ---
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+
+    // Bar chart
+    new Chart(document.getElementById('barChart'), {
+      type: 'bar',
+      data: {
+        labels: months,
+        datasets: [{
+          label: 'Revenue ($K)',
+          data: [12, 19, 8, 15, 22, 30],
+          backgroundColor: 'rgba(59, 130, 246, 0.7)',
+          borderRadius: 6,
+        }]
+      },
+      options: { responsive: true, plugins: { legend: { display: false } } }
+    });
+
+    // Line chart
+    new Chart(document.getElementById('lineChart'), {
+      type: 'line',
+      data: {
+        labels: months,
+        datasets: [{
+          label: 'Users',
+          data: [200, 450, 800, 1200, 1800, 2400],
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          fill: true,
+          tension: 0.3,
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    // Doughnut chart
+    new Chart(document.getElementById('doughnutChart'), {
+      type: 'doughnut',
+      data: {
+        labels: ['Direct', 'Search', 'Social', 'Referral'],
+        datasets: [{
+          data: [40, 30, 20, 10],
+          backgroundColor: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+        }]
+      },
+      options: { responsive: true }
+    });
+
+    // Radar chart
+    new Chart(document.getElementById('radarChart'), {
+      type: 'radar',
+      data: {
+        labels: ['Speed', 'Reliability', 'UX', 'Features', 'Security', 'Docs'],
+        datasets: [{
+          label: 'Current',
+          data: [85, 90, 70, 75, 95, 60],
+          borderColor: '#8b5cf6',
+          backgroundColor: 'rgba(139, 92, 246, 0.15)',
+        }]
+      },
+      options: { responsive: true, scales: { r: { beginAtZero: true, max: 100 } } }
+    });
+  </script>
+</body>
+</html>

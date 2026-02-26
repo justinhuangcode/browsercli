@@ -233,12 +233,32 @@ browsercli has a built-in plugin system with **three extension points**: page te
     └── on_start.sh          # Lifecycle hook script
 ```
 
-### 1. Page Templates
+### Built-in Templates
 
-Templates are HTML/CSS/JS scaffolds that get copied to the serve directory at startup:
+browsercli ships with 4 built-in templates that work out of the box — no plugins needed:
+
+| Template | Stack | Use Case |
+|----------|-------|----------|
+| `tailwind` | Tailwind CSS v4 CDN | General-purpose responsive UI |
+| `dashboard` | Tailwind CSS v4 + DaisyUI v5 | Admin panels, monitoring dashboards |
+| `chart` | Tailwind CSS v4 + Chart.js v4 | Data visualization (bar, line, doughnut, radar) |
+| `form` | Tailwind CSS v4 + Alpine.js v3 | Interactive forms with client-side validation |
 
 ```bash
+browsercli start --template tailwind
 browsercli start --template dashboard
+browsercli start --template chart
+browsercli start --template form
+```
+
+All templates are single-file HTML with CDN imports — zero build step, instant reload.
+
+### 1. Page Templates (Plugins)
+
+Plugins can provide additional templates. Templates are HTML/CSS/JS scaffolds that get copied to the serve directory at startup:
+
+```bash
+browsercli start --template my-custom-template
 ```
 
 ### 2. Custom RPC Endpoints
@@ -463,6 +483,16 @@ By default, browsercli removes the `navigator.webdriver` flag and applies minor 
 | `--no-stealth` | All stealth patches disabled — browser reports as automated |
 
 **Scope:** Stealth mode is strictly for local development and testing where automation detection interferes with page behavior. It is *not* designed for bypassing security controls on external websites.
+
+## Troubleshooting
+
+See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for common issues and solutions, including:
+
+- Browser not found — install instructions per platform
+- Port conflicts
+- Headless mode on servers / CI
+- Permission errors
+- Template not found
 
 ## Contributing
 

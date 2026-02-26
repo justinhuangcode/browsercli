@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.4] - 2026-02-26
+
+### Added
+
+- **Built-in templates** -- 4 starter templates (`tailwind`, `dashboard`, `chart`, `form`) ship with the binary, no plugins needed. Use `browsercli start --template <name>`. All templates use Tailwind CSS v4 CDN with zero build step.
+- **TROUBLESHOOTING.md** -- comprehensive guide covering browser detection, port conflicts, headless mode, permissions, and more
+- **Improved browser-not-found error** -- platform-specific install instructions (macOS/Linux/Windows) shown when no Chromium browser is detected
+
+### Changed
+
+- `plugin list` now displays built-in templates alongside plugin-provided templates
+- README and README_CN updated with built-in template documentation and troubleshooting section
+
 ## [1.0.3] - 2026-02-26
 
 ### Added
@@ -148,6 +161,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Headless mode support
 - GitHub Actions CI (check, test, fmt, clippy, release builds)
 
+[1.0.4]: https://github.com/justinhuangcode/browsercli/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/justinhuangcode/browsercli/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/justinhuangcode/browsercli/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/justinhuangcode/browsercli/compare/v1.0.0...v1.0.1
