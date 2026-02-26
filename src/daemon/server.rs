@@ -117,8 +117,7 @@ pub async fn run_daemon(cfg: DaemonConfig) -> Result<()> {
     tokio::fs::create_dir_all(&profile_dir).await?;
 
     let browser_bin = if cfg.browser_bin.is_empty() {
-        crate::browser::find::find_chromium_binary()
-            .context(browser_not_found_message())?
+        crate::browser::find::find_chromium_binary().context(browser_not_found_message())?
     } else {
         cfg.browser_bin.clone()
     };
