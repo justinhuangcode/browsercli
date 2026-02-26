@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.1] - 2026-02-26
+
+### Added
+
+- **Homebrew tap** -- `brew tap justinhuangcode/tap && brew install browsercli` with auto-updated formula on release
+- **Full multi-channel publishing** -- crates.io, npm, PyPI, and Homebrew tap all configured and enabled
+
 ## [1.0.0] - 2026-02-26
 
 ### Changed
@@ -128,6 +135,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Headless mode support
 - GitHub Actions CI (check, test, fmt, clippy, release builds)
 
+[1.0.1]: https://github.com/justinhuangcode/browsercli/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/justinhuangcode/browsercli/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/justinhuangcode/browsercli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/justinhuangcode/browsercli/compare/v0.2.0...v0.3.0

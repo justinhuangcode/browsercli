@@ -269,11 +269,86 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # 7. Summary
+  # 7. Update Homebrew tap (skipped if token not configured)
+  # ---------------------------------------------------------------------------
+  publish-homebrew:
+    name: Publish Homebrew
+    needs: release
+    runs-on: ubuntu-latest
+    if: vars.PUBLISH_HOMEBREW == 'true'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - name: Download SHA256SUMS from release
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          gh release download "v${VERSION}" --pattern "*.sha256" --dir checksums
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate formula
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+
+          # Extract SHA256 for each target
+          SHA_DARWIN_ARM64=$(grep "aarch64-apple-darwin" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_DARWIN_X86=$(grep "x86_64-apple-darwin" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_LINUX_ARM64=$(grep "aarch64-unknown-linux-gnu" checksums/*.sha256 | head -1 | awk '{print $1}')
+          SHA_LINUX_X86=$(grep "x86_64-unknown-linux-gnu" checksums/*.sha256 | head -1 | awk '{print $1}')
+
+          # Generate formula from template
+          sed -e "s/version \"1.0.0\"/version \"${VERSION}\"/" \
+              Formula/browsercli.rb > browsercli.rb.tmp
+
+          # Replace PLACEHOLDER sha256 values in order:
+          # 1st PLACEHOLDER = darwin arm64, 2nd = darwin x86, 3rd = linux arm64, 4th = linux x86
+          python3 -c "
+          import re
+          with open('browsercli.rb.tmp') as f:
+              content = f.read()
+          shas = ['${SHA_DARWIN_ARM64}', '${SHA_DARWIN_X86}', '${SHA_LINUX_ARM64}', '${SHA_LINUX_X86}']
+          for sha in shas:
+              content = content.replace('PLACEHOLDER', sha, 1)
+          with open('browsercli.rb', 'w') as f:
+              f.write(content)
+          "
+
+          echo "Generated formula:"
+          cat browsercli.rb
+
+      - name: Push to Homebrew tap
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          REPO="${{ github.repository_owner }}/homebrew-tap"
+
+          # Clone the tap repo
+          git clone "https://x-access-token:${{ secrets.HOMEBREW_TAP_TOKEN }}@github.com/${REPO}.git" tap
+
+          # Copy formula
+          mkdir -p tap/Formula
+          cp browsercli.rb tap/Formula/browsercli.rb
+
+          # Commit and push
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/browsercli.rb
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update browsercli to v${VERSION}"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 8. Summary
   # ---------------------------------------------------------------------------
   summary:
     name: Summary
-    needs: [release, publish-crate, publish-npm, publish-pypi]
+    needs: [release, publish-crate, publish-npm, publish-pypi, publish-homebrew]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -288,12 +363,13 @@ jobs:
             echo "- GitHub Release: ${{ needs.release.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          for job in publish-crate publish-npm publish-pypi; do
+          for job in publish-crate publish-npm publish-pypi publish-homebrew; do
             result=""
             case "$job" in
-              publish-crate) result="${{ needs.publish-crate.result }}" ;;
-              publish-npm)   result="${{ needs.publish-npm.result }}" ;;
-              publish-pypi)  result="${{ needs.publish-pypi.result }}" ;;
+              publish-crate)    result="${{ needs.publish-crate.result }}" ;;
+              publish-npm)      result="${{ needs.publish-npm.result }}" ;;
+              publish-pypi)     result="${{ needs.publish-pypi.result }}" ;;
+              publish-homebrew) result="${{ needs.publish-homebrew.result }}" ;;
             esac
             channel="${job#publish-}"
             if [ "$result" = "success" ]; then

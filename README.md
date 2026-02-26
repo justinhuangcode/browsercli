@@ -51,6 +51,13 @@ Download the latest binary for your platform from [GitHub Releases](https://gith
 
 Extract the archive and place the binary in your `$PATH`.
 
+### Homebrew (macOS / Linux)
+
+```bash
+brew tap justinhuangcode/tap
+brew install browsercli
+```
+
 ### Via Cargo (crates.io)
 
 ```bash

@@ -51,6 +51,13 @@
 
 解压后将二进制文件放入 `$PATH` 即可。
 
+### Homebrew (macOS / Linux)
+
+```bash
+brew tap justinhuangcode/tap
+brew install browsercli
+```
+
 ### 通过 Cargo 安装 (crates.io)
 
 ```bash
