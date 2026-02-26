@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — browsercli plugin example</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Analytics Dashboard</h1>
+        <p class="subtitle">browsercli plugin example</p>
+    </header>
+
+    <main>
+        <section class="metrics">
+            <div class="card" id="card-requests">
+                <h2>Requests</h2>
+                <span class="value" id="metric-requests">0</span>
+            </div>
+            <div class="card" id="card-errors">
+                <h2>Errors</h2>
+                <span class="value" id="metric-errors">0</span>
+            </div>
+            <div class="card" id="card-latency">
+                <h2>Avg Latency</h2>
+                <span class="value" id="metric-latency">0 ms</span>
+            </div>
+            <div class="card" id="card-uptime">
+                <h2>Uptime</h2>
+                <span class="value" id="metric-uptime">0s</span>
+            </div>
+        </section>
+
+        <section class="log">
+            <h2>Event Log</h2>
+            <ul id="event-log"></ul>
+        </section>
+    </main>
+
+    <footer>
+        <button id="btn-refresh">Refresh</button>
+        <span id="last-updated">Never</span>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,33 @@
+{
+  "name": "dashboard",
+  "version": "1.0.0",
+  "description": "Example analytics dashboard plugin for browsercli",
+  "author": "browsercli contributors",
+  "templates": {
+    "dashboard": {
+      "description": "Analytics dashboard with live metrics",
+      "source": "templates/dashboard/",
+      "entrypoint": "index.html"
+    }
+  },
+  "hooks": {
+    "on_daemon_start": "hooks/on_start.sh",
+    "on_navigate": "hooks/on_navigate.sh"
+  },
+  "rpc": {
+    "endpoints": [
+      {
+        "path": "/x/dashboard/refresh",
+        "handler": "handlers/refresh.sh",
+        "method": "POST",
+        "description": "Refresh dashboard metrics"
+      },
+      {
+        "path": "/x/dashboard/stats",
+        "handler": "handlers/stats.sh",
+        "method": "POST",
+        "description": "Get current statistics"
+      }
+    ]
+  }
+}

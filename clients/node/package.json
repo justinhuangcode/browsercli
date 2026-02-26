@@ -1,0 +1,38 @@
+{
+  "name": "browsercli",
+  "version": "0.4.0",
+  "description": "TypeScript/Node.js client for the browsercli browser workspace daemon",
+  "type": "module",
+  "main": "./dist/src/index.js",
+  "types": "./dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "import": "./dist/src/index.js"
+    }
+  },
+  "files": [
+    "dist/src"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "npm run build && node --test dist/tests/client.test.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "browsercli",
+    "browser",
+    "automation",
+    "rpc",
+    "unix-socket",
+    "cdp"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.19.12",
+    "typescript": "^5.9.3"
+  }
+}
