@@ -150,7 +150,25 @@ impl ScriptExecutor {
 fn resolve_interpreter(script_path: &Path) -> (String, Vec<String>) {
     #[cfg(unix)]
     {
-        (script_path.to_string_lossy().to_string(), vec![])
+        let ext = script_path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("");
+        match ext.to_lowercase().as_str() {
+            "sh" | "bash" => (
+                "/bin/sh".to_string(),
+                vec![script_path.to_string_lossy().to_string()],
+            ),
+            "py" | "python" => (
+                "python3".to_string(),
+                vec![script_path.to_string_lossy().to_string()],
+            ),
+            "js" | "mjs" => (
+                "node".to_string(),
+                vec![script_path.to_string_lossy().to_string()],
+            ),
+            _ => (script_path.to_string_lossy().to_string(), vec![]),
+        }
     }
     #[cfg(windows)]
     {
