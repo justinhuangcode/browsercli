@@ -27,6 +27,7 @@ jobs:
               ref: `tags/${tag}`
             });
             const sha = ref.object.sha;
+            core.info(`Tag ${tag} points to ${sha}`);
 
             // Wait up to 5 minutes for CI to appear / complete
             const maxWait = 5 * 60 * 1000;
@@ -34,14 +35,19 @@ jobs:
             let ciRun = null;
 
             while (Date.now() - start < maxWait) {
-              const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+              const { data: runs } = await github.rest.actions.listWorkflowRuns({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 workflow_id: 'ci.yml',
                 head_sha: sha,
-                per_page: 5
+                per_page: 10
               });
-              ciRun = runs.workflow_runs[0] || null;
+              // Filter to ensure we only get CI workflow runs (name: "CI")
+              const ciRuns = runs.workflow_runs.filter(r => r.name === 'CI');
+              ciRun = ciRuns[0] || null;
+              if (ciRun) {
+                core.info(`Found CI run ${ciRun.id}: status=${ciRun.status}, conclusion=${ciRun.conclusion}`);
+              }
               if (ciRun && ciRun.status === 'completed') break;
               await new Promise(r => setTimeout(r, 15000));
             }
