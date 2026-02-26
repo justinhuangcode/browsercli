@@ -5,7 +5,7 @@
 [![CI](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml)
 [![Release](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml)
 [![Crates.io](https://img.shields.io/crates/v/browsercli?style=flat-square)](https://crates.io/crates/browsercli)
-[![npm](https://img.shields.io/npm/v/browsercli?style=flat-square)](https://www.npmjs.com/package/browsercli)
+[![npm](https://img.shields.io/npm/v/@justinhuangcode/browsercli?style=flat-square)](https://www.npmjs.com/package/@justinhuangcode/browsercli)
 [![PyPI](https://img.shields.io/pypi/v/browsercli?style=flat-square)](https://pypi.org/project/browsercli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
@@ -68,7 +68,7 @@ cargo install browsercli
 
 ```bash
 # Node.js
-npm install browsercli
+npm install @justinhuangcode/browsercli
 
 # Python
 pip install browsercli
@@ -297,7 +297,7 @@ cd clients/node && npm install
 ```
 
 ```typescript
-import { BrowserCLI } from "browsercli";
+import { BrowserCLI } from "@justinhuangcode/browsercli";
 
 const ac = BrowserCLI.connect();   // 读取 ~/.browsercli/session.json
 await ac.goto("/");

@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.2] - 2026-02-26
+
+### Changed
+
+- **npm scoped package** -- renamed from `browsercli` to `@justinhuangcode/browsercli` to resolve npm naming conflict with existing `browser-cli` package
+- **PyPI publish idempotency** -- `twine upload --skip-existing` prevents re-run failures when version is already published
+
 ## [1.0.1] - 2026-02-26
 
 ### Added
@@ -135,6 +142,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Headless mode support
 - GitHub Actions CI (check, test, fmt, clippy, release builds)
 
+[1.0.2]: https://github.com/justinhuangcode/browsercli/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/justinhuangcode/browsercli/compare/v1.0.0...v1.0.1
 [1.0.0]: https://github.com/justinhuangcode/browsercli/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/justinhuangcode/browsercli/compare/v0.3.0...v0.4.0

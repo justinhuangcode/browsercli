@@ -3,7 +3,7 @@
  *
  * @example
  * ```ts
- * import { BrowserCLI } from "browsercli";
+ * import { BrowserCLI } from "@justinhuangcode/browsercli";
  *
  * const ac = BrowserCLI.connect();
  * console.log(await ac.status());

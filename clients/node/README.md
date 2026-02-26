@@ -20,7 +20,7 @@ No code changes are needed — `BrowserCLI.connect()` handles both transports.
 ## Quick Start
 
 ```typescript
-import { BrowserCLI } from "browsercli";
+import { BrowserCLI } from "@justinhuangcode/browsercli";
 
 // Connect to a running daemon
 // macOS/Linux: reads ~/.browsercli/session.json
@@ -56,7 +56,7 @@ import {
   SessionError,
   NotFoundError,
   ServerError,
-} from "browsercli";
+} from "@justinhuangcode/browsercli";
 
 try {
   const ac = BrowserCLI.connect();
