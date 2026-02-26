@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.0] - 2026-02-26
+
+### Changed
+
+- **First stable release** -- API is now considered stable and will follow semantic versioning
+- Version bump across all packages (Rust CLI, Node.js client, Python client)
+- Python package status upgraded from Alpha to Production/Stable
+- Added package metadata for npm and PyPI distribution
+- Optimized crate with `exclude` patterns for smaller crates.io package
+
+### Added
+
+- **Release workflow** -- automated cross-platform binary builds via GitHub Actions on tag push
+- **Multi-channel publishing** -- crates.io, npm, and PyPI with graceful fallback when tokens not configured
+- **SHA256 checksums** for all release binaries
+- **Linux ARM64 builds** -- `aarch64-unknown-linux-gnu` added to CI and release matrix
+- **macOS Intel builds** -- `x86_64-apple-darwin` added to release matrix (5 targets total)
+
 ## [0.4.0] - 2025-02-26
 
 ### Added
@@ -110,6 +128,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Headless mode support
 - GitHub Actions CI (check, test, fmt, clippy, release builds)
 
+[1.0.0]: https://github.com/justinhuangcode/browsercli/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/justinhuangcode/browsercli/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/justinhuangcode/browsercli/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/justinhuangcode/browsercli/compare/v0.1.1...v0.2.0

@@ -1,0 +1,299 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # 1. Verify CI passed for this commit
+  # ---------------------------------------------------------------------------
+  check-ci:
+    name: Verify CI
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check CI workflow status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const tag = context.ref.replace('refs/tags/', '');
+            const { data: ref } = await github.rest.git.getRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: `tags/${tag}`
+            });
+            const sha = ref.object.sha;
+
+            // Wait up to 5 minutes for CI to appear / complete
+            const maxWait = 5 * 60 * 1000;
+            const start = Date.now();
+            let ciRun = null;
+
+            while (Date.now() - start < maxWait) {
+              const { data: runs } = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                workflow_id: 'ci.yml',
+                head_sha: sha,
+                per_page: 5
+              });
+              ciRun = runs.workflow_runs[0] || null;
+              if (ciRun && ciRun.status === 'completed') break;
+              await new Promise(r => setTimeout(r, 15000));
+            }
+
+            if (!ciRun) {
+              core.setFailed(`No CI run found for ${sha}`);
+              return;
+            }
+            if (ciRun.conclusion !== 'success') {
+              core.setFailed(`CI run ${ciRun.html_url} did not succeed (${ciRun.conclusion})`);
+              return;
+            }
+            core.info(`CI passed: ${ciRun.html_url}`);
+
+  # ---------------------------------------------------------------------------
+  # 2. Build cross-platform release binaries
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build ${{ matrix.target }}
+    needs: check-ci
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: browsercli
+            archive: tar.gz
+          - os: ubuntu-latest
+            target: aarch64-unknown-linux-gnu
+            artifact: browsercli
+            archive: tar.gz
+            use_cross: true
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: browsercli
+            archive: tar.gz
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: browsercli
+            archive: tar.gz
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: browsercli.exe
+            archive: zip
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-${{ matrix.target }}
+
+      - name: Install cross
+        if: matrix.use_cross
+        run: cargo install cross --git https://github.com/cross-rs/cross
+
+      - name: Build
+        shell: bash
+        run: |
+          if [ "${{ matrix.use_cross }}" = "true" ]; then
+            cross build --release --target ${{ matrix.target }}
+          else
+            cargo build --release --target ${{ matrix.target }}
+          fi
+
+      - name: Extract version
+        id: ver
+        shell: bash
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      # Package: tar.gz (Linux / macOS)
+      - name: Package (tar.gz)
+        if: matrix.archive == 'tar.gz'
+        shell: bash
+        run: |
+          NAME="browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}"
+          mkdir "$NAME"
+          cp "target/${{ matrix.target }}/release/${{ matrix.artifact }}" "$NAME/"
+          cp LICENSE README.md "$NAME/"
+          tar czf "$NAME.tar.gz" "$NAME"
+          shasum -a 256 "$NAME.tar.gz" > "$NAME.tar.gz.sha256"
+
+      # Package: zip (Windows)
+      - name: Package (zip)
+        if: matrix.archive == 'zip'
+        shell: pwsh
+        run: |
+          $NAME = "browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}"
+          New-Item -ItemType Directory -Path $NAME
+          Copy-Item "target/${{ matrix.target }}/release/${{ matrix.artifact }}" "$NAME/"
+          Copy-Item LICENSE, README.md "$NAME/"
+          Compress-Archive -Path "$NAME/*" -DestinationPath "$NAME.zip"
+          $hash = (Get-FileHash "$NAME.zip" -Algorithm SHA256).Hash.ToLower()
+          "$hash  $NAME.zip" | Out-File -FilePath "$NAME.zip.sha256" -Encoding ascii -NoNewline
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ matrix.target }}
+          path: browsercli-v${{ steps.ver.outputs.version }}-${{ matrix.target }}.*
+          retention-days: 1
+
+  # ---------------------------------------------------------------------------
+  # 3. Create GitHub Release
+  # ---------------------------------------------------------------------------
+  release:
+    name: GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version
+        id: ver
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      # Extract release notes from CHANGELOG.md
+      - name: Extract release notes
+        run: |
+          VERSION="${{ steps.ver.outputs.version }}"
+          awk "/^## \[$VERSION\]/{found=1; next} /^## \[/{if(found) exit} found{print}" \
+            CHANGELOG.md > release_notes.md
+
+          if [ ! -s release_notes.md ]; then
+            echo "Release v$VERSION" > release_notes.md
+            echo "" >> release_notes.md
+            echo "See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for details." >> release_notes.md
+          fi
+
+      # Unified checksums file
+      - name: Create SHA256SUMS
+        run: cat artifacts/*.sha256 > artifacts/SHA256SUMS
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: browsercli v${{ steps.ver.outputs.version }}
+          body_path: release_notes.md
+          files: |
+            artifacts/*.tar.gz
+            artifacts/*.zip
+            artifacts/*.sha256
+            artifacts/SHA256SUMS
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 4. Publish to crates.io (skipped if token not configured)
+  # ---------------------------------------------------------------------------
+  publish-crate:
+    name: Publish crates.io
+    needs: release
+    runs-on: ubuntu-latest
+    if: vars.PUBLISH_CRATES == 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - run: cargo publish
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 5. Publish Node.js client to npm (skipped if token not configured)
+  # ---------------------------------------------------------------------------
+  publish-npm:
+    name: Publish npm
+    needs: release
+    runs-on: ubuntu-latest
+    if: vars.PUBLISH_NPM == 'true'
+    defaults:
+      run:
+        working-directory: clients/node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 6. Publish Python client to PyPI (skipped if token not configured)
+  # ---------------------------------------------------------------------------
+  publish-pypi:
+    name: Publish PyPI
+    needs: release
+    runs-on: ubuntu-latest
+    if: vars.PUBLISH_PYPI == 'true'
+    defaults:
+      run:
+        working-directory: clients/python
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install build twine
+      - run: python -m build
+      - run: twine check dist/*
+      - run: twine upload dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 7. Summary
+  # ---------------------------------------------------------------------------
+  summary:
+    name: Summary
+    needs: [release, publish-crate, publish-npm, publish-pypi]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report
+        run: |
+          echo "## Release Summary" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "${{ needs.release.result }}" = "success" ]; then
+            echo "- GitHub Release: created" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "- GitHub Release: ${{ needs.release.result }}" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          for job in publish-crate publish-npm publish-pypi; do
+            result=""
+            case "$job" in
+              publish-crate) result="${{ needs.publish-crate.result }}" ;;
+              publish-npm)   result="${{ needs.publish-npm.result }}" ;;
+              publish-pypi)  result="${{ needs.publish-pypi.result }}" ;;
+            esac
+            channel="${job#publish-}"
+            if [ "$result" = "success" ]; then
+              echo "- $channel: published" >> "$GITHUB_STEP_SUMMARY"
+            elif [ "$result" = "skipped" ]; then
+              echo "- $channel: skipped (not configured)" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- $channel: $result" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done

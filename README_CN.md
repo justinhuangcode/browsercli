@@ -3,6 +3,10 @@
 [English](./README.md) | **中文**
 
 [![CI](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml)
+[![Release](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml)
+[![Crates.io](https://img.shields.io/crates/v/browsercli?style=flat-square)](https://crates.io/crates/browsercli)
+[![npm](https://img.shields.io/npm/v/browsercli?style=flat-square)](https://www.npmjs.com/package/browsercli)
+[![PyPI](https://img.shields.io/pypi/v/browsercli?style=flat-square)](https://pypi.org/project/browsercli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![Node.js](https://img.shields.io/badge/node.js-18%2B-green.svg?style=flat-square&logo=node.js&logoColor=white)](clients/node/)
@@ -33,21 +37,40 @@
 
 ## 安装
 
-### 预编译二进制
+### 预编译二进制（推荐）
 
-从 [GitHub Releases](https://github.com/justinhuangcode/browsercli/releases) 下载适合你平台的二进制文件，放入 `$PATH` 即可。
+从 [GitHub Releases](https://github.com/justinhuangcode/browsercli/releases) 下载适合你平台的二进制文件：
+
+| 平台 | 文件 |
+| --- | --- |
+| Linux x86_64 | `browsercli-v*-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux ARM64 | `browsercli-v*-aarch64-unknown-linux-gnu.tar.gz` |
+| macOS Intel | `browsercli-v*-x86_64-apple-darwin.tar.gz` |
+| macOS Apple Silicon | `browsercli-v*-aarch64-apple-darwin.tar.gz` |
+| Windows x86_64 | `browsercli-v*-x86_64-pc-windows-msvc.zip` |
+
+解压后将二进制文件放入 `$PATH` 即可。
+
+### 通过 Cargo 安装 (crates.io)
+
+```bash
+cargo install browsercli
+```
+
+### 客户端库
+
+```bash
+# Node.js
+npm install browsercli
+
+# Python
+pip install browsercli
+```
 
 ### 从源码安装
 
 ```bash
 cargo install --path .
-```
-
-或手动构建：
-
-```bash
-cargo build --release
-# 二进制文件位于 target/release/browsercli
 ```
 
 **前置要求：** Rust 1.75+ 和基于 Chromium 的浏览器（Chrome、Chromium、Brave 或 Edge）。在 Windows 上，Microsoft Edge 开箱即用。

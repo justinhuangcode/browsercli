@@ -3,6 +3,10 @@
 **English** | [中文](./README_CN.md)
 
 [![CI](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/ci.yml)
+[![Release](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml/badge.svg)](https://github.com/justinhuangcode/browsercli/actions/workflows/release.yml)
+[![Crates.io](https://img.shields.io/crates/v/browsercli?style=flat-square)](https://crates.io/crates/browsercli)
+[![npm](https://img.shields.io/npm/v/browsercli?style=flat-square)](https://www.npmjs.com/package/browsercli)
+[![PyPI](https://img.shields.io/pypi/v/browsercli?style=flat-square)](https://pypi.org/project/browsercli/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg?style=flat-square&logo=rust&logoColor=white)](https://www.rust-lang.org)
 [![Node.js](https://img.shields.io/badge/node.js-18%2B-green.svg?style=flat-square&logo=node.js&logoColor=white)](clients/node/)
@@ -33,21 +37,40 @@ A browser visual workspace for AI agents. Write HTML/CSS/JS in a local directory
 
 ## Installation
 
-### Pre-built binaries
+### Pre-built binaries (recommended)
 
-Download the latest binary for your platform from [GitHub Releases](https://github.com/justinhuangcode/browsercli/releases), then place it in your `$PATH`.
+Download the latest binary for your platform from [GitHub Releases](https://github.com/justinhuangcode/browsercli/releases):
+
+| Platform | Archive |
+| --- | --- |
+| Linux x86_64 | `browsercli-v*-x86_64-unknown-linux-gnu.tar.gz` |
+| Linux ARM64 | `browsercli-v*-aarch64-unknown-linux-gnu.tar.gz` |
+| macOS Intel | `browsercli-v*-x86_64-apple-darwin.tar.gz` |
+| macOS Apple Silicon | `browsercli-v*-aarch64-apple-darwin.tar.gz` |
+| Windows x86_64 | `browsercli-v*-x86_64-pc-windows-msvc.zip` |
+
+Extract the archive and place the binary in your `$PATH`.
+
+### Via Cargo (crates.io)
+
+```bash
+cargo install browsercli
+```
+
+### Client libraries
+
+```bash
+# Node.js
+npm install browsercli
+
+# Python
+pip install browsercli
+```
 
 ### From source
 
 ```bash
 cargo install --path .
-```
-
-Or build manually:
-
-```bash
-cargo build --release
-# Binary at target/release/browsercli
 ```
 
 **Requirements:** Rust 1.75+ and a Chromium-based browser (Chrome, Chromium, Brave, or Edge). On Windows, Microsoft Edge works out of the box.

@@ -1,6 +1,6 @@
 {
   "name": "browsercli",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "TypeScript/Node.js client for the browsercli browser workspace daemon",
   "type": "module",
   "main": "./dist/src/index.js",
@@ -28,6 +28,15 @@
     "cdp"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/justinhuangcode/browsercli.git",
+    "directory": "clients/node"
+  },
+  "homepage": "https://github.com/justinhuangcode/browsercli#readme",
+  "bugs": {
+    "url": "https://github.com/justinhuangcode/browsercli/issues"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
