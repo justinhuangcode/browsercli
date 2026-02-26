@@ -1,6 +1,6 @@
 [package]
 name = "browsercli"
-version = "1.0.2"
+version = "1.0.3"
 edition = "2021"
 rust-version = "1.75"
 description = "A browser visual workspace for AI agents"

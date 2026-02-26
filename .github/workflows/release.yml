@@ -269,7 +269,32 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # 7. Update Homebrew tap (skipped if token not configured)
+  # 7. Publish npm to GitHub Packages (mirrors npmjs.org for sidebar visibility)
+  # ---------------------------------------------------------------------------
+  publish-github-npm:
+    name: Publish GitHub Packages
+    needs: release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    defaults:
+      run:
+        working-directory: clients/node
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          registry-url: 'https://npm.pkg.github.com'
+      - run: npm ci
+      - run: npm run build
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ---------------------------------------------------------------------------
+  # 8. Update Homebrew tap (skipped if token not configured)
   # ---------------------------------------------------------------------------
   publish-homebrew:
     name: Publish Homebrew
@@ -344,11 +369,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 
   # ---------------------------------------------------------------------------
-  # 8. Summary
+  # 9. Summary
   # ---------------------------------------------------------------------------
   summary:
     name: Summary
-    needs: [release, publish-crate, publish-npm, publish-pypi, publish-homebrew]
+    needs: [release, publish-crate, publish-npm, publish-github-npm, publish-pypi, publish-homebrew]
     if: always()
     runs-on: ubuntu-latest
     steps:
@@ -363,13 +388,14 @@ jobs:
             echo "- GitHub Release: ${{ needs.release.result }}" >> "$GITHUB_STEP_SUMMARY"
           fi
 
-          for job in publish-crate publish-npm publish-pypi publish-homebrew; do
+          for job in publish-crate publish-npm publish-github-npm publish-pypi publish-homebrew; do
             result=""
             case "$job" in
-              publish-crate)    result="${{ needs.publish-crate.result }}" ;;
-              publish-npm)      result="${{ needs.publish-npm.result }}" ;;
-              publish-pypi)     result="${{ needs.publish-pypi.result }}" ;;
-              publish-homebrew) result="${{ needs.publish-homebrew.result }}" ;;
+              publish-crate)      result="${{ needs.publish-crate.result }}" ;;
+              publish-npm)        result="${{ needs.publish-npm.result }}" ;;
+              publish-github-npm) result="${{ needs.publish-github-npm.result }}" ;;
+              publish-pypi)       result="${{ needs.publish-pypi.result }}" ;;
+              publish-homebrew)   result="${{ needs.publish-homebrew.result }}" ;;
             esac
             channel="${job#publish-}"
             if [ "$result" = "success" ]; then
