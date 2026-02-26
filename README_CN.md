@@ -155,20 +155,77 @@ browsercli dom "#app" --mode text
 
 ## 插件系统
 
-browsercli 支持基于脚本的插件，可自定义模板、RPC 端点和生命周期钩子。插件是位于 `~/.browsercli/plugins/<name>/`（macOS/Linux）或 `%LOCALAPPDATA%\browsercli\plugins\<name>\`（Windows）的目录，包含 `plugin.json` 清单文件。
+browsercli 内置插件系统，提供**三大扩展点**：页面模板、自定义 RPC 端点和生命周期钩子。插件是包含 `plugin.json` 清单和可执行脚本的普通目录——无需编译、WASM 或动态链接库。
+
+```
+~/.browsercli/plugins/my-plugin/
+├── plugin.json              # 清单文件（必需）
+├── templates/
+│   └── dashboard/           # HTML/CSS/JS 脚手架
+│       ├── index.html
+│       ├── style.css
+│       └── app.js
+├── handlers/
+│   └── refresh.sh           # 自定义 RPC 端点脚本
+└── hooks/
+    └── on_start.sh          # 生命周期钩子脚本
+```
+
+### 1. 页面模板
+
+模板是 HTML/CSS/JS 脚手架，在启动时复制到服务目录：
 
 ```bash
-# 创建插件脚手架
-browsercli plugin init my-plugin
-
-# 列出已安装的插件
-browsercli plugin list
-
-# 使用插件模板启动
 browsercli start --template dashboard
 ```
 
-详细的插件开发指南请参阅 [`PLUGINS.md`](PLUGINS.md)，以及[示例插件](examples/plugins/dashboard/)。
+### 2. 自定义 RPC 端点
+
+插件可在 `/x/` 命名空间下暴露 HTTP 端点。处理脚本从 stdin 接收 JSON，向 stdout 输出 JSON：
+
+```bash
+# handlers/refresh.sh
+#!/bin/sh
+INPUT=$(cat)
+echo '{"ok": true, "refreshed_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+```
+
+通过客户端库调用：
+
+```typescript
+// Node.js
+const result = await ac.pluginRpc("/x/dashboard/refresh", { key: "value" });
+```
+
+```python
+# Python
+result = ac.plugin_rpc("/x/dashboard/refresh", {"key": "value"})
+```
+
+### 3. 生命周期钩子
+
+由守护进程事件触发的即发即忘脚本：
+
+| 事件 | 触发时机 | 额外上下文 |
+| --- | --- | --- |
+| `on_daemon_start` | 守护进程就绪 | -- |
+| `on_daemon_stop` | 守护进程关闭中 | -- |
+| `on_file_change` | 服务目录文件变更 | `$BROWSERCLI_FILE_PATH` |
+| `on_navigate` | 浏览器导航 | `$BROWSERCLI_URL` |
+| `on_console` | 控制台消息 | stdin 传入 JSON |
+| `on_network` | 网络请求 | stdin 传入 JSON |
+
+### 插件 CLI
+
+```bash
+browsercli plugin init my-plugin   # 创建插件脚手架
+browsercli plugin list             # 列出已安装插件
+browsercli start --template name   # 启动时应用插件模板
+```
+
+所有脚本均可获取环境变量：`BROWSERCLI_TOKEN`、`BROWSERCLI_HTTP_PORT`、`BROWSERCLI_DIR`、`BROWSERCLI_BASE_URL`、`BROWSERCLI_STATE_DIR`、`BROWSERCLI_PLUGIN_NAME`。
+
+完整开发指南、清单 Schema、安全模型和跨平台说明请参阅 [`PLUGINS.md`](PLUGINS.md)。附带完整的[示例插件](examples/plugins/dashboard/)。
 
 ## 工作原理
 

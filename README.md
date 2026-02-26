@@ -155,20 +155,77 @@ browsercli dom "#app" --mode text
 
 ## Plugin System
 
-browsercli supports script-based plugins for custom templates, RPC endpoints, and lifecycle hooks. Plugins are directories in `~/.browsercli/plugins/<name>/` (macOS/Linux) or `%LOCALAPPDATA%\browsercli\plugins\<name>\` (Windows) containing a `plugin.json` manifest.
+browsercli has a built-in plugin system with **three extension points**: page templates, custom RPC endpoints, and lifecycle hooks. Plugins are plain directories with a `plugin.json` manifest and executable scripts -- no compilation, WASM, or dynamic libraries required.
+
+```
+~/.browsercli/plugins/my-plugin/
+├── plugin.json              # Manifest (required)
+├── templates/
+│   └── dashboard/           # HTML/CSS/JS scaffold
+│       ├── index.html
+│       ├── style.css
+│       └── app.js
+├── handlers/
+│   └── refresh.sh           # Custom RPC endpoint script
+└── hooks/
+    └── on_start.sh          # Lifecycle hook script
+```
+
+### 1. Page Templates
+
+Templates are HTML/CSS/JS scaffolds that get copied to the serve directory at startup:
 
 ```bash
-# Scaffold a new plugin
-browsercli plugin init my-plugin
-
-# List installed plugins
-browsercli plugin list
-
-# Start with a plugin template
 browsercli start --template dashboard
 ```
 
-See [`PLUGINS.md`](PLUGINS.md) for the full plugin development guide and an [example plugin](examples/plugins/dashboard/).
+### 2. Custom RPC Endpoints
+
+Plugins can expose HTTP endpoints under the `/x/` namespace. Handler scripts receive JSON on stdin and write JSON to stdout:
+
+```bash
+# handlers/refresh.sh
+#!/bin/sh
+INPUT=$(cat)
+echo '{"ok": true, "refreshed_at": "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'"}'
+```
+
+Call from client libraries:
+
+```typescript
+// Node.js
+const result = await ac.pluginRpc("/x/dashboard/refresh", { key: "value" });
+```
+
+```python
+# Python
+result = ac.plugin_rpc("/x/dashboard/refresh", {"key": "value"})
+```
+
+### 3. Lifecycle Hooks
+
+Fire-and-forget scripts triggered by daemon events:
+
+| Event | Trigger | Extra Context |
+| --- | --- | --- |
+| `on_daemon_start` | Daemon is ready | -- |
+| `on_daemon_stop` | Daemon shutting down | -- |
+| `on_file_change` | File changed in serve dir | `$BROWSERCLI_FILE_PATH` |
+| `on_navigate` | Browser navigated | `$BROWSERCLI_URL` |
+| `on_console` | Console message | JSON on stdin |
+| `on_network` | Network request | JSON on stdin |
+
+### Plugin CLI
+
+```bash
+browsercli plugin init my-plugin   # Scaffold a new plugin
+browsercli plugin list             # List installed plugins
+browsercli start --template name   # Apply a plugin template at startup
+```
+
+All scripts receive environment variables: `BROWSERCLI_TOKEN`, `BROWSERCLI_HTTP_PORT`, `BROWSERCLI_DIR`, `BROWSERCLI_BASE_URL`, `BROWSERCLI_STATE_DIR`, `BROWSERCLI_PLUGIN_NAME`.
+
+See [`PLUGINS.md`](PLUGINS.md) for the full development guide, manifest schema, security model, and cross-platform notes. A complete [example plugin](examples/plugins/dashboard/) is included.
 
 ## How It Works
 
