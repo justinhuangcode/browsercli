@@ -1,4 +1,4 @@
-# browsercli
+# BrowserCLI
 
 **English** | [中文](./README_CN.md)
 
@@ -16,7 +16,7 @@
 [![Issues](https://img.shields.io/github/issues/justinhuangcode/browsercli?style=flat-square)](https://github.com/justinhuangcode/browsercli/issues)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square)](https://github.com/justinhuangcode/browsercli)
 
-A browser visual workspace for AI agents. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control — all from the command line.
+A local-first browser rendering CLI for AI agents and developers. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control.
 
 ## Why browsercli?
 
