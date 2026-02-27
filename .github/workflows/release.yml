@@ -233,7 +233,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
-      - run: cargo publish
+      - name: Publish (skip if already published)
+        run: |
+          cargo publish 2>&1 || {
+            if cargo search browsercli --limit 1 | grep -q "$(grep '^version' Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')"; then
+              echo "::warning::Version already published to crates.io — skipping"
+            else
+              exit 1
+            fi
+          }
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
@@ -256,7 +264,15 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - run: npm ci
       - run: npm run build
-      - run: npm publish --access public
+      - name: Publish (skip if already published)
+        run: |
+          npm publish --access public 2>&1 || {
+            if npm view @justinhuangcode/browsercli version 2>/dev/null | grep -qF "$(node -p 'require("./package.json").version')"; then
+              echo "::warning::Version already published to npm — skipping"
+            else
+              exit 1
+            fi
+          }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -305,7 +321,17 @@ jobs:
           registry-url: 'https://npm.pkg.github.com'
       - run: npm ci
       - run: npm run build
-      - run: npm publish --access public
+      - name: Publish (skip if already published)
+        run: |
+          npm publish --access public 2>&1 || {
+            CURRENT=$(node -p 'require("./package.json").version')
+            # GitHub Packages uses the GitHub npm registry; check if this version exists
+            if npm view @justinhuangcode/browsercli@${CURRENT} version --registry=https://npm.pkg.github.com 2>/dev/null | grep -qF "${CURRENT}"; then
+              echo "::warning::Version ${CURRENT} already published to GitHub Packages — skipping"
+            else
+              exit 1
+            fi
+          }
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
