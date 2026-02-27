@@ -16,7 +16,7 @@
 [![Issues](https://img.shields.io/github/issues/justinhuangcode/browsercli?style=flat-square)](https://github.com/justinhuangcode/browsercli/issues)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square)](https://github.com/justinhuangcode/browsercli)
 
-A local-first browser rendering CLI for AI agents and developers. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control.
+A local-first browser rendering CLI for live preview, browser control, and DevTools capture. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control. 🎨
 
 ## Why browsercli?
 

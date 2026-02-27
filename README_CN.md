@@ -16,7 +16,7 @@
 [![Issues](https://img.shields.io/github/issues/justinhuangcode/browsercli?style=flat-square)](https://github.com/justinhuangcode/browsercli/issues)
 [![Platform](https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey?style=flat-square)](https://github.com/justinhuangcode/browsercli)
 
-本地优先的浏览器渲染命令行工具，面向 AI 智能体和开发者。在本地目录中编写 HTML/CSS/JS，通过真实的 Chromium 浏览器渲染，完整支持 DevTools 控制。
+本地优先的浏览器渲染命令行工具，支持实时预览、浏览器控制与 DevTools 数据采集。在本地目录中编写 HTML/CSS/JS，通过真实的 Chromium 浏览器渲染，完整支持 DevTools 控制。 🎨
 
 ## 为什么选择 browsercli？
 
