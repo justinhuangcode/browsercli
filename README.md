@@ -18,7 +18,7 @@
 
 A local-first browser rendering CLI for live preview, browser control, and DevTools capture. Write HTML/CSS/JS in a local directory and have it rendered in a real Chromium browser with full DevTools control. 🎨
 
-## Why browsercli?
+## Why BrowserCLI?
 
 AI agents that generate HTML/CSS/JS need to **see what they built**. They need to render the page in a real browser, take a screenshot, read the DOM, check for console errors, and iterate — all without a human clicking around.
 
